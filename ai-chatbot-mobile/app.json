@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "MindfulChat",
+    "slug": "mindfulchat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#667eea"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mindfulchat.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app uses the microphone for voice input in chat conversations.",
+        "NSSpeechRecognitionUsageDescription": "This app uses speech recognition to convert your voice to text for messaging."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#667eea",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.mindfulchat.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
+          }
+        }
+      ]
+    ]
+  }
+}
