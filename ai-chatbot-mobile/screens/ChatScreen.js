@@ -8,6 +8,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  NativeModules,
   Alert,
   ActivityIndicator,
   Modal,
@@ -17,11 +18,13 @@ import Voice from '@react-native-community/voice';
 import { chatAPI, baselineAPI } from '../services/api';
 import { removeAuthToken } from '../services/auth';
 
-const ChatScreen = ({ navigation }) => {
+const ChatScreen = ({ setUserAuthenticated }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [voiceAvailable, setVoiceAvailable] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [cognitiveLoad, setCognitiveLoad] = useState(null);
   const [baselineStatus, setBaselineStatus] = useState({ is_ready: false, n_samples: 0 });
@@ -29,15 +32,19 @@ const ChatScreen = ({ navigation }) => {
 
   useEffect(() => {
     initializeChat();
-    setupVoiceRecognition();
+    const isVoiceAvailable = setupVoiceRecognition();
+    setVoiceAvailable(isVoiceAvailable);
     fetchBaselineStatus();
     
     return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
+      if (isVoiceAvailable) {
+        Voice.destroy().then(Voice.removeAllListeners).catch(() => {});
+      }
     };
   }, []);
 
   const initializeChat = async () => {
+    setSessionLoading(true);
     try {
       console.log('Starting chat session...');
       const session = await chatAPI.startSession();
@@ -53,7 +60,15 @@ const ChatScreen = ({ navigation }) => {
       }]);
     } catch (error) {
       console.error('Failed to start chat session:', error);
+      if (error.response?.status === 401) {
+        await removeAuthToken();
+        Alert.alert('Session expired', 'Please sign in again.');
+        setUserAuthenticated(false);
+        return;
+      }
       Alert.alert('Error', `Failed to start chat session: ${error.message}`);
+    } finally {
+      setSessionLoading(false);
     }
   };
 
@@ -63,10 +78,18 @@ const ChatScreen = ({ navigation }) => {
       setBaselineStatus(status);
     } catch (error) {
       console.error('Failed to fetch baseline status:', error);
+      if (error.response?.status === 401) {
+        await removeAuthToken();
+      }
     }
   };
 
   const setupVoiceRecognition = () => {
+    if (!NativeModules.Voice) {
+      console.warn('Voice recognition native module is unavailable. Use a development build instead of Expo Go.');
+      return false;
+    }
+
     Voice.onSpeechStart = () => setIsRecording(true);
     Voice.onSpeechEnd = () => setIsRecording(false);
     Voice.onSpeechResults = (e) => {
@@ -76,17 +99,35 @@ const ChatScreen = ({ navigation }) => {
       setIsRecording(false);
       console.error('Speech recognition error:', e);
     };
+    return true;
+  };
+
+  const showVoiceUnavailableAlert = () => {
+    Alert.alert(
+      'Voice input unavailable',
+      'Speech recognition needs a custom Expo development build. You can still type your message here.'
+    );
   };
 
   const startRecording = async () => {
+    if (!voiceAvailable) {
+      showVoiceUnavailableAlert();
+      return;
+    }
+
     try {
       await Voice.start('en-US');
     } catch (error) {
       console.error('Failed to start recording:', error);
+      showVoiceUnavailableAlert();
     }
   };
 
   const stopRecording = async () => {
+    if (!voiceAvailable) {
+      return;
+    }
+
     try {
       await Voice.stop();
     } catch (error) {
@@ -95,14 +136,22 @@ const ChatScreen = ({ navigation }) => {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || !sessionId) {
-      console.log('Cannot send message: no input or session');
+    const trimmedInput = input.trim();
+
+    if (!trimmedInput) {
+      console.log('Cannot send message: no input');
+      return;
+    }
+
+    if (!sessionId) {
+      console.log('Cannot send message: no active session');
+      Alert.alert('Please wait', 'The chat session is still connecting. Try again in a moment.');
       return;
     }
 
     const userMessage = {
       id: Date.now(),
-      text: input.trim(),
+      text: trimmedInput,
       sender: 'user',
       timestamp: new Date(),
     };
@@ -150,7 +199,7 @@ const ChatScreen = ({ navigation }) => {
           text: 'Sign Out',
           onPress: async () => {
             await removeAuthToken();
-            navigation.replace('SignIn');
+            setUserAuthenticated(false);
           },
         },
       ]
@@ -236,29 +285,34 @@ const ChatScreen = ({ navigation }) => {
               style={styles.textInput}
               value={input}
               onChangeText={setInput}
-              placeholder="Type a message..."
+              placeholder={sessionLoading ? 'Connecting to chat...' : 'Type a message...'}
               placeholderTextColor="#999"
               multiline
               maxLength={500}
+              editable={!sessionLoading}
             />
             
             <TouchableOpacity
-              style={[styles.voiceButton, isRecording && styles.voiceButtonActive]}
-              onPress={isRecording ? stopRecording : startRecording}
+              style={[
+                styles.voiceButton,
+                isRecording && styles.voiceButtonActive,
+                !voiceAvailable && styles.voiceButtonDisabled,
+              ]}
+              onPress={voiceAvailable ? (isRecording ? stopRecording : startRecording) : showVoiceUnavailableAlert}
             >
               <Icon 
                 name={isRecording ? "mic" : "mic-none"} 
                 size={24} 
-                color={isRecording ? "#fff" : "#667eea"} 
+                color={isRecording ? "#fff" : voiceAvailable ? "#667eea" : "#999"}
               />
             </TouchableOpacity>
             
             <TouchableOpacity
-              style={[styles.sendButton, loading && styles.sendButtonDisabled]}
+              style={[styles.sendButton, (loading || sessionLoading || !sessionId) && styles.sendButtonDisabled]}
               onPress={sendMessage}
-              disabled={loading || !input.trim()}
+              disabled={loading || sessionLoading || !sessionId || !input.trim()}
             >
-              {loading ? (
+              {loading || sessionLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
                 <Icon name="send" size={20} color="#fff" />
@@ -406,6 +460,9 @@ const styles = StyleSheet.create({
   },
   voiceButtonActive: {
     backgroundColor: '#ff4444',
+  },
+  voiceButtonDisabled: {
+    backgroundColor: '#e8e8e8',
   },
   sendButton: {
     width: 45,

@@ -1,14 +1,17 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://192.168.194.108:8000'; // Your computer's IP address
+const API_BASE_URL = 'http://192.168.1.190:8000'; // Your computer's current LAN IP address
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+console.log('API base URL:', API_BASE_URL);
 
 // Add auth token to requests
 api.interceptors.request.use(async (config) => {
@@ -18,6 +21,16 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      await AsyncStorage.removeItem('authToken');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const authAPI = {
   signUp: async (email, password) => {

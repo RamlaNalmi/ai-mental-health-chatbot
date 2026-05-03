@@ -26,14 +26,16 @@ const AuthStack = ({ setUserAuthenticated }) => (
   </Stack.Navigator>
 );
 
-const AppStack = () => (
+const AppStack = ({ setUserAuthenticated }) => (
   <Stack.Navigator 
     screenOptions={{
       headerShown: false,
       cardStyle: { backgroundColor: '#f5f5f5' }
     }}
   >
-    <Stack.Screen name="Chat" component={ChatScreen} />
+    <Stack.Screen name="Chat">
+      {props => <ChatScreen {...props} setUserAuthenticated={setUserAuthenticated} />}
+    </Stack.Screen>
   </Stack.Navigator>
 );
 
@@ -64,7 +66,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <StatusBar style="light" />
-      {userAuthenticated ? <AppStack /> : <AuthStack setUserAuthenticated={setUserAuthenticated} />}
+      {userAuthenticated ? <AppStack setUserAuthenticated={setUserAuthenticated} /> : <AuthStack setUserAuthenticated={setUserAuthenticated} />}
     </NavigationContainer>
   );
 };

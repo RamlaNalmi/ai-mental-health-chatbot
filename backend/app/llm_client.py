@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 import requests
 
 from .config import settings
@@ -19,9 +20,9 @@ def llm_chat(messages: List[Dict[str, str]]) -> str:
         "messages": messages,
         "stream": False,
         "options": {
-            "temperature": 0.7,
-            "num_predict": 300
-        }
+            "temperature": 0.5,
+            "num_predict": 120,
+        },
     }
 
     try:
@@ -37,26 +38,31 @@ def llm_chat(messages: List[Dict[str, str]]) -> str:
         raise LLMError(f"Ollama request failed: {e}")
 
 
-def simple_fallback_reply(pred_label: Optional[str], baseline_ready: bool) -> str:
+def simple_fallback_reply(
+    pred_label: Optional[str],
+    baseline_ready: bool,
+    user_text: Optional[str] = None,
+    stress_label: Optional[int] = None,
+) -> str:
     """
     Fallback if Ollama is down. Keeps the pipeline testable.
     """
-    if not baseline_ready:
+    text = (user_text or "").strip().lower()
+
+    if stress_label == 1 or "stress" in text or "not feeling" in text:
         return (
-            "I’m here. Before we go deep—quick check: are you feeling stressed, tired, or both? "
-            "Also, what’s the *one* task you need to tackle next?"
+            "I hear you. Let's slow this down for a moment: take one easy breath, unclench your jaw, "
+            "and tell me what feels heaviest right now."
         )
+
+    if not baseline_ready:
+        return "I'm here with you. Before we go deeper, are you feeling more stressed, tired, or overwhelmed?"
 
     if pred_label == "High":
         return (
-            "Okay—keep it tiny. Breathe in 4 seconds, out 6 seconds (x3). "
-            "Now tell me the next *single* step you can do in 5 minutes."
+            "Okay, let's keep this very small. Breathe in for 4 seconds, out for 6 seconds, three times. "
+            "Then tell me the next single step you can do in 5 minutes."
         )
     if pred_label == "Medium":
-        return (
-            "Let’s simplify. What’s the deadline, and what’s the hardest part right now? "
-            "We’ll make a short plan."
-        )
-    return (
-        "I’m with you. Tell me what’s going on, and what you’ve already tried so far."
-    )
+        return "Let's simplify this. What is the hardest part right now, and what needs your attention first?"
+    return "I'm with you. Tell me what's going on, and what you've already tried so far."

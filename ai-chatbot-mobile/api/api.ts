@@ -1,6 +1,20 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
-const API_URL = 'http://YOUR_PC_IP:8000'; // replace with your FastAPI server IP
+// Choose a sensible default depending on runtime environment:
+// - Android emulator (Android Studio): use 10.0.2.2 to reach host machine
+// - iOS simulator: localhost reaches host machine
+// - Physical device / Expo Go: replace the placeholder with your computer IP (see EXPO_SETUP.md)
+let API_URL = 'http://YOUR_PC_IP:8000';
+if (Platform.OS === 'android') {
+  API_URL = 'http://10.0.2.2:8000';
+} else if (Platform.OS === 'ios') {
+  API_URL = 'http://localhost:8000';
+}
+
+if (API_URL.includes('YOUR_PC_IP')) {
+  console.warn('api: please set API URL to your computer IP in api/api.ts or EXPO_SETUP.md');
+}
 
 const api = axios.create({
   baseURL: API_URL,

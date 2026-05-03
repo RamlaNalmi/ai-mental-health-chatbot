@@ -121,14 +121,15 @@ def _system_prompt(pred_label: str | None, baseline_ready: bool, stress_label: i
         "You are a supportive wellbeing chatbot for university students. "
         "You are not a clinician. Do not claim diagnosis or treatment. "
         "If the user expresses self-harm intent or imminent danger, advise seeking immediate local emergency help or professional support. "
-        "Keep responses practical, emotionally supportive, and avoid overconfident medical claims."
+        "Keep responses practical, emotionally supportive, and avoid overconfident medical claims. "
+        "Reply in 2-5 short sentences. Do not use long numbered lists unless the user asks for a plan."
     )
     if not baseline_ready:
         base += " Personalization baseline is still being learned; ask clarifying questions and avoid strong personalization."
     if pred_label == "High":
         base += " Cognitive load is HIGH: keep it short, calming, one step at a time, avoid lists and complex options."
     elif pred_label == "Medium":
-        base += " Cognitive load is MEDIUM: be structured, concise, ask 1-2 focused questions."
+        base += " Cognitive load is MEDIUM: be structured and concise; give one tiny next step and ask one focused question."
     elif pred_label == "Low":
         base += " Cognitive load is LOW: normal supportive conversation."
 
@@ -235,7 +236,12 @@ def chat_message(session_id: int, req: schemas.ChatMessageIn, user=Depends(get_c
         print(e)
         print("Using fallback reply")
 
-        reply = simple_fallback_reply(pred_label if ready else None, baseline_ready)
+        reply = simple_fallback_reply(
+            pred_label if ready else None,
+            baseline_ready,
+            user_text=req.text,
+            stress_label=stress_label,
+        )
 
     db.add(models.ChatMessage(session_id=session_id, user_id=user.id, role="assistant", content=reply))
     db.commit()

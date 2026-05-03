@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     # --- Local LLM (Ollama) ---
     OLLAMA_URL: str = "http://127.0.0.1:11434"
-    OLLAMA_MODEL: str = "llama3.1:8b"   # or "phi3:mini"
+    OLLAMA_MODEL: str = "qwen2.5:3b"
 
     CHAT_MAX_TURNS: int = 12
 
