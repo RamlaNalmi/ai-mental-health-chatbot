@@ -25,7 +25,7 @@ def llm_chat(messages: List[Dict[str, str]]) -> str:
     }
 
     try:
-        r = requests.post(url, json=payload, timeout=600)
+        r = requests.post(url, json=payload, timeout=120)
         if r.status_code != 200:
             raise LLMError(f"Ollama HTTP {r.status_code}: {r.text[:500]}")
         data = r.json()

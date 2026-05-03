@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --scrollbar-bg: #151821;
+  --scrollbar-thumb: #1E2230;
+}
+
+/* Thin dark scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
+
+/* Smooth focus ring */
+*:focus-visible { outline: 2px solid #7C6FCD; outline-offset: 2px; }
+
+/* Textarea reset */
+textarea { resize: none; font-family: inherit; }
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fadeUp 0.28s ease-out forwards;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
