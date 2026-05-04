@@ -40,18 +40,29 @@ export default function SignInPage() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0D0F14] px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(160deg, #fefcff 0%, #f4effe 35%, #ede4fc 65%, #f8f4ff 100%)' }}>
       <div className="max-w-md w-full space-y-8">
         
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-[#3D3669] border border-[#7C6FCD]/40 flex items-center justify-center">
-            <span className="text-lg font-bold text-[#7C6FCD]">M</span>
+          <div className="mx-auto h-16 w-16 rounded-2xl shadow-2xl flex items-center justify-center animate-float" style={{ background: 'linear-gradient(135deg, #8b6bbf, #7c4dbe)' }}>
+            <span className="text-2xl font-bold text-white">MC</span>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-[#F0EEF9]">
-            Sign in to Mira
+          <h2 className="mt-8 text-4xl font-bold" style={{ 
+            fontFamily: 'Playfair Display, Georgia, serif',
+            fontWeight: '700',
+            lineHeight: '0.92',
+            letterSpacing: '-0.03em',
+            color: '#6246a3'
+          }}>
+            Welcome back to <span style={{ color: '#b39ddb', fontStyle: 'italic' }}>MindfulChat</span>
           </h2>
-          <p className="mt-2 text-sm text-[#4A4760]">
-            Your AI wellbeing companion
+          <p className="mt-3 text-lg" style={{ 
+            fontFamily: 'Playfair Display, Georgia, serif',
+            fontStyle: 'italic',
+            fontWeight: '400',
+            color: '#8a7a9e'
+          }}>
+            Your elegant AI wellness companion for mental clarity
           </p>
         </div>
 
@@ -59,7 +70,7 @@ export default function SignInPage() {
           <div className="space-y-4">
 
             <div>
-              <label className="block text-sm font-medium text-[#8B87A8] mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#6246a3', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Email address
               </label>
               <input
@@ -68,13 +79,13 @@ export default function SignInPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-[#151821] border border-[rgba(255,255,255,0.07)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7C6FCD] text-[#F0EEF9] placeholder-[#4A4760]"
+                className="input-primary w-full"
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#8B87A8] mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#6246a3', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Password
               </label>
               <input
@@ -83,7 +94,7 @@ export default function SignInPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-[#151821] border border-[rgba(255,255,255,0.07)] rounded-lg text-[#F0EEF9] placeholder-[#4A4760] focus:outline-none focus:border-[#7C6FCD] focus:ring-1 focus:ring-[#7C6FCD]"
+                className="input-primary w-full"
                 placeholder="Enter your password"
               />
             </div>
@@ -91,29 +102,30 @@ export default function SignInPage() {
           </div>
 
           {error && (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg px-3 py-2">
-              <p className="text-sm text-red-400">{error}</p>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
+              <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 rounded-lg text-sm font-medium text-white bg-[#7C6FCD] hover:bg-[#6B5EBC] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn-primary w-full flex justify-center items-center"
           >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="loading-spinner" />
             ) : (
               'Sign in'
             )}
           </button>
 
           <div className="text-center">
-            <p className="text-sm text-[#4A4760]">
+            <p className="text-sm" style={{ color: '#8a7a9e', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               Don&apos;t have an account?{' '}
               <a
                 href="/auth/signup"
-                className="font-medium text-[#7C6FCD] hover:text-[#6B5EBC]"
+                style={{ color: '#6246a3', fontFamily: 'Plus Jakarta Sans, sans-serif' }}
+                className="font-medium hover:text-purple-d transition-colors"
               >
                 Sign up
               </a>

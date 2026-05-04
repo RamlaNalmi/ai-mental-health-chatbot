@@ -1,115 +1,92 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { cameraAPI } from '../services/api'
 
-const POLL_INTERVAL_MS = 500  // poll backend every 500ms (2fps) - reduced for memory
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
 
 export function useWebcam({ onStressDetected } = {}) {
   const [active,       setActive]       = useState(false)
+  const [streamUrl,    setStreamUrl]    = useState(null)
   const [stressLevel,  setStressLevel]  = useState('no_stress')
   const [faceDetected, setFaceDetected] = useState(false)
-  const [faceScore,    setFaceScore]    = useState(0)
+  const [faceScore,    setFaceScore]    = useState(0.0)
   const [loading,      setLoading]      = useState(false)
   const [error,        setError]        = useState(null)
-  const [frameUrl,     setFrameUrl]     = useState(null)
 
-  const intervalRef = useRef(null)
-  const activeRef   = useRef(false)
+  const stressIntervalRef = useRef(null)
+  const activeRef         = useRef(false)
 
-  const pollCamera = useCallback(async () => {
+  // ── Stress poll — every 40s, completely separate from video ──
+  const pollStress = useCallback(async () => {
     if (!activeRef.current) return
-
     try {
-      const data = await cameraAPI.getFrame()       // GET /camera/frame
-      if (data.frame_b64) {
-        // Clear previous frame to free memory
-        setFrameUrl(null)
-        // Small delay to allow garbage collection
-        setTimeout(() => {
-          if (activeRef.current) {
-            setFrameUrl(`data:image/jpeg;base64,${data.frame_b64}`)
-          }
-        }, 10)
-      }
-      const det = data.detections || {}
-      setStressLevel(det.stress_level  ?? 'no_stress')
-      setFaceDetected(det.face_detected ?? false)
-      setFaceScore(det.face_score      ?? 0)
-
-      if (det.stress_level === 'high' && onStressDetected) {
-        onStressDetected(det)
-      }
-    } catch {
-      // silently drop — frame might not be ready yet
-    }
+      const data  = await cameraAPI.getStatus()
+      const level = data.stress_level ?? 'no_stress'
+      setStressLevel(level)
+      setFaceDetected(data.face_detected ?? false)
+      setFaceScore(data.face_score ?? 0.0)
+      if (level === 'high') onStressDetected?.(data)
+    } catch (_) {}
   }, [onStressDetected])
 
-  const startWebcam = useCallback(async () => {
+  // ── Start ────────────────────────────────────────────────────
+  const start = useCallback(async () => {
     if (activeRef.current) return
     setLoading(true)
     setError(null)
-    setFrameUrl(null)
-
     try {
-      // Start camera on backend
       await cameraAPI.start()
-      
-      activeRef.current  = true
+      activeRef.current = true
       setActive(true)
 
-      // Start polling for frames
-      intervalRef.current = setInterval(pollCamera, POLL_INTERVAL_MS)
-      
-      // Initial poll immediately
-      pollCamera()
+      // Stream URL — browser handles this natively, buttery smooth
+      // Token in query param so the img tag can authenticate
+      const token = localStorage.getItem('access_token')
+      setStreamUrl(`${BASE_URL}/camera/stream?token=${token}`)
 
-    } catch (e) {
-      setError(e.response?.data?.detail || 'Could not start camera')
-      console.error('[useWebcam] start error:', e)
+      // Stress updates every 40s
+      stressIntervalRef.current = setInterval(pollStress, 40000)
+      pollStress()   // immediate first read
+    } catch (err) {
+      console.error('[useWebcam] start failed:', err)
+      setError('Failed to start camera')
     } finally {
       setLoading(false)
     }
-  }, [pollCamera])
+  }, [pollStress])
 
-  const stopWebcam = useCallback(async () => {
+  // ── Stop ─────────────────────────────────────────────────────
+  const stop = useCallback(async () => {
     activeRef.current = false
     setActive(false)
-    clearInterval(intervalRef.current)
-    intervalRef.current = null
-    
-    // Clear frame URL to free memory
-    setFrameUrl(null)
-    setFaceDetected(false)
-    setFaceScore(0)
-    setStressLevel('no_stress')
-    
-    try {
-      await cameraAPI.stop()                // POST /camera/stop
-    } catch { /* ignore */ }
+    setStreamUrl(null)
+
+    clearInterval(stressIntervalRef.current)
+    stressIntervalRef.current = null
+
+    try { await cameraAPI.stop() } catch (_) {}
   }, [])
 
   const toggle = useCallback(() => {
-    active ? stopWebcam() : startWebcam()
-  }, [active, startWebcam, stopWebcam])
+    activeRef.current ? stop() : start()
+  }, [start, stop])
 
-  // Stop on unmount - proper cleanup to prevent memory leaks
-  useEffect(() => () => {
-    activeRef.current = false
-    clearInterval(intervalRef.current)
-    intervalRef.current = null
-    setFrameUrl(null)  // Clear frame URL to free memory
-    cameraAPI.stop().catch(() => {})
+  useEffect(() => {
+    return () => {
+      activeRef.current = false
+      clearInterval(stressIntervalRef.current)
+    }
   }, [])
 
   return {
     active,
+    streamUrl,      // ← use this in <img src={streamUrl} />
     stressLevel,
     faceDetected,
     faceScore,
     loading,
     error,
-    frameUrl,    // base64 data URL for <img> element
     toggle,
-    startWebcam,
-    stopWebcam,
+    start,
+    stop,
   }
 }

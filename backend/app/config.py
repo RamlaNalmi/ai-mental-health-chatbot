@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
     # --- Local LLM (Ollama) ---
     OLLAMA_URL: str = "http://127.0.0.1:11434"
-    OLLAMA_MODEL: str = "phi3:mini"   # Smaller model for less memory
+    OLLAMA_MODEL: str = "qwen2.5:3b"   # Small efficient model for less memory
 
     CHAT_MAX_TURNS: int = 12
 

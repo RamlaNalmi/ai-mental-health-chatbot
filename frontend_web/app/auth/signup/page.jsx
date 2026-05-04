@@ -35,20 +35,35 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0D0F14] px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'linear-gradient(160deg, #fefcff 0%, #f4effe 35%, #ede4fc 65%, #f8f4ff 100%)' }}>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-[#3D3669] border border-[#7C6FCD]/40 flex items-center justify-center">
-            <span className="text-lg font-bold text-[#7C6FCD]">M</span>
+          <div className="mx-auto h-16 w-16 rounded-2xl shadow-2xl flex items-center justify-center animate-float" style={{ background: 'linear-gradient(135deg, #8b6bbf, #7c4dbe)' }}>
+            <span className="text-2xl font-bold text-white">MC</span>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-[#F0EEF9]">Create your Mira account</h2>
-          <p className="mt-2 text-sm text-[#4A4760]">Start your wellbeing journey</p>
+          <h2 className="mt-8 text-4xl font-bold" style={{ 
+            fontFamily: 'Playfair Display, Georgia, serif',
+            fontWeight: '700',
+            lineHeight: '0.92',
+            letterSpacing: '-0.03em',
+            color: '#6246a3'
+          }}>
+            Create your <span style={{ color: '#b39ddb', fontStyle: 'italic' }}>MindfulChat</span> account
+          </h2>
+          <p className="mt-3 text-lg" style={{ 
+            fontFamily: 'Playfair Display, Georgia, serif',
+            fontStyle: 'italic',
+            fontWeight: '400',
+            color: '#8a7a9e'
+          }}>
+            Start your elegant wellness journey
+          </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#8B87A8] mb-2">
+              <label htmlFor="name" className="block text-sm font-medium mb-2" style={{ color: '#6246a3', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Full name
               </label>
               <input
@@ -58,13 +73,13 @@ export default function SignUpPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 bg-[#151821] border border-[rgba(255,255,255,0.07)] rounded-lg text-[#F0EEF9] placeholder-[#4A4760] focus:outline-none focus:border-[#7C6FCD] focus:ring-1 focus:ring-[#7C6FCD]"
+                className="input-primary w-full"
                 placeholder="Enter your full name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#8B87A8] mb-2">
+              <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: '#6246a3', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Email address
               </label>
               <input
@@ -74,13 +89,13 @@ export default function SignUpPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-[#151821] border border-[rgba(255,255,255,0.07)] rounded-lg text-[#F0EEF9] placeholder-[#4A4760] focus:outline-none focus:border-[#7C6FCD] focus:ring-1 focus:ring-[#7C6FCD]"
+                className="input-primary w-full"
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#8B87A8] mb-2">
+              <label htmlFor="password" className="block text-sm font-medium mb-2" style={{ color: '#6246a3', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Password
               </label>
               <input
@@ -90,13 +105,13 @@ export default function SignUpPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-[#151821] border border-[rgba(255,255,255,0.07)] rounded-lg text-[#F0EEF9] placeholder-[#4A4760] focus:outline-none focus:border-[#7C6FCD] focus:ring-1 focus:ring-[#7C6FCD]"
+                className="input-primary w-full"
                 placeholder="Create a password"
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#8B87A8] mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2" style={{ color: '#c7b8ea', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 Confirm password
               </label>
               <input
@@ -106,15 +121,20 @@ export default function SignUpPage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-[#151821] border border-[rgba(255,255,255,0.07)] rounded-lg text-[#F0EEF9] placeholder-[#4A4760] focus:outline-none focus:border-[#7C6FCD] focus:ring-1 focus:ring-[#7C6FCD]"
+                className="input-primary w-full"
                 placeholder="Confirm your password"
               />
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg px-3 py-2">
-              <p className="text-sm text-red-400">{error}</p>
+            <div style={{ 
+              background: 'rgba(239,68,68,0.1)', 
+              border: '1px solid rgba(239,68,68,0.2)', 
+              borderRadius: '12px', 
+              padding: '12px 16px' 
+            }}>
+              <p style={{ fontSize: '0.875rem', color: '#dc2626', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>{error}</p>
             </div>
           )}
 
@@ -122,10 +142,11 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#7C6FCD] hover:bg-[#6B5EBC] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7C6FCD] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="btn-primary w-full flex justify-center items-center"
+              style={{ fontSize: '0.84rem', padding: '15px 38px' }}
             >
               {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="loading-spinner" />
               ) : (
                 'Create account'
               )}
@@ -133,11 +154,20 @@ export default function SignUpPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-[#4A4760]">
+            <p style={{ 
+              fontSize: '0.875rem', 
+              color: '#8a7a9e', 
+              fontFamily: 'Plus Jakarta Sans, sans-serif' 
+            }}>
               Already have an account?{' '}
               <a
                 href="/auth/signin"
-                className="font-medium text-[#7C6FCD] hover:text-[#6B5EBC] transition-colors"
+                style={{ 
+                  color: '#6246a3', 
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  fontWeight: '500'
+                }}
+                className="font-medium hover:text-purple-d transition-colors"
               >
                 Sign in
               </a>

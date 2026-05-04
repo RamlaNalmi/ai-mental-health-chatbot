@@ -5,7 +5,7 @@ const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const api = axios.create({
   baseURL: BASE,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000,
+  timeout: 180000, // 3 minutes
 })
 
 let isRefreshing = false
@@ -102,38 +102,53 @@ export const authAPI = {
     api.post('/auth/signup', { email, password, name }).then(r => r.data),
 }
 
-// ── Chat ──────────────────────────────────────────────────────────────
 export const chatAPI = {
   startSession: () =>
     api.post('/chat/start').then(r => r.data),
 
-  sendMessage: (sessionId, text, keystrokes = []) => {
+  sendMessage: (sessionId, text, keystrokes = [], voiceScore = null) => {
     const ks = keystrokes.length > 0
       ? keystrokes
       : [{ key: 'x', ts_ms: Date.now(), type: 'down' }]
-    const endpoint = keystrokes.length > 1
+
+    // Route to /chat/message whenever voice_score is present
+    // so the full fusion pipeline runs with all signals
+    const endpoint = (keystrokes.length > 1 || voiceScore !== null)
       ? `/chat/message?session_id=${sessionId}`
       : `/chat/message-fast?session_id=${sessionId}`
-    return api.post(endpoint, { text, keystrokes: ks, voice_features: null }).then(r => r.data)
+
+    const body = {
+      text,
+      keystrokes:     ks,
+      voice_features: null,
+      voice_score:    voiceScore,
+    }
+
+    return api.post(endpoint, body).then(r => r.data)
   },
 
   getFusionStatus: () =>
     api.get('/fuse/status').then(r => r.data),
-}
-
-// ── Baseline ──────────────────────────────────────────────────────────
+}// ── Baseline ──────────────────────────────────────────────────────────
 export const baselineAPI = {
   getStatus: () => api.get('/baseline/status').then(r => r.data),
 }
 
 // ── Audio ─────────────────────────────────────────────────────────────
 export const audioAPI = {
-  upload: (blob) => {
+  upload: (blob, mimeType = 'audio/webm') => {
+    // Pick the right extension based on actual mime type
+    const ext = mimeType.includes('mp4') ? 'mp4'
+              : mimeType.includes('ogg') ? 'ogg'
+              : mimeType.includes('wav') ? 'wav'
+              : 'webm'
+    
     const form = new FormData()
-    form.append('file', blob, 'recording.wav')
+    form.append('file', blob, `recording.${ext}`)
+    console.log('[audioAPI] Uploading as:', `recording.${ext}`, 'size:', blob.size)
     return api.post('/upload-audio', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 60000,
+      timeout: 180000, // 3 minutes
     }).then(r => r.data)
   },
 }
@@ -162,9 +177,10 @@ export const recommendationAPI = {
 }
 
 export const cameraAPI = {
-  start:    () => api.post('/camera/start').then(r => r.data),
-  stop:     () => api.post('/camera/stop').then(r => r.data),
-  getFrame: () => api.get('/camera/frame').then(r => r.data),
+  start:     () => api.post('/camera/start').then(r => r.data),
+  stop:      () => api.post('/camera/stop').then(r => r.data),
+  getFrame:  () => api.get('/camera/frame').then(r => r.data),
+  getStatus: () => api.get('/camera/status').then(r => r.data),  // ← missing
 }
 
 export default api

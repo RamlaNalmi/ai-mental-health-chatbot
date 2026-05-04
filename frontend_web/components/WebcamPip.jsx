@@ -6,33 +6,28 @@ const BORDER = {
 }
 
 export default function WebcamPip({
-  frameUrl,
+  streamUrl,        // ← was frameUrl
   active,
   stressLevel,
   faceDetected,
   faceScore,
   loading,
-  fps,
   onToggle,
 }) {
   const color = BORDER[stressLevel] ?? BORDER.no_stress
 
   return (
     <div className="flex flex-col items-center gap-1 flex-shrink-0">
-
-      {/* The pip itself */}
       <div
-        className="relative w-24 h-16 rounded-xl overflow-hidden border-2 bg-[#1E2230] transition-all duration-300"
+        className="relative w-64 h-48 rounded-xl overflow-hidden border-2 bg-[#1E2230] transition-all duration-300"
         style={{ borderColor: color }}
       >
-        {/* Live annotated frame from backend */}
-        {/* Live camera feed from backend */}
-        {active && frameUrl ? (
+        {/* ── Stream replaces the polled frameUrl img ── */}
+        {active && streamUrl ? (
           <img
-            src={frameUrl}
+            src={streamUrl}          // ← MJPEG stream URL, browser handles it natively
             alt="Camera feed"
             className="w-full h-full object-cover"
-            style={{ transform: 'scaleX(-1)' }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -44,7 +39,6 @@ export default function WebcamPip({
           </div>
         )}
 
-        {/* Face detected dot */}
         {active && (
           <div
             className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full border border-black/20 transition-colors duration-500"
@@ -52,7 +46,6 @@ export default function WebcamPip({
           />
         )}
 
-        {/* Score badge */}
         {active && faceDetected && (
           <div className="absolute bottom-1 left-1 text-[9px] font-mono px-1 rounded"
             style={{ backgroundColor: color + 'cc', color: '#fff' }}>
@@ -61,7 +54,6 @@ export default function WebcamPip({
         )}
       </div>
 
-      {/* Toggle button */}
       <button
         onClick={onToggle}
         disabled={loading}
@@ -75,7 +67,6 @@ export default function WebcamPip({
         {loading ? 'starting…' : active ? 'camera on' : 'camera off'}
       </button>
 
-      {/* Stress label */}
       {active && stressLevel !== 'no_stress' && (
         <p className="text-[9px]" style={{ color }}>
           {stressLevel}

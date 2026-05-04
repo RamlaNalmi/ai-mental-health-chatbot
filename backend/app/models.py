@@ -155,13 +155,22 @@ class MessageStressAnalytics(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # ── Text stress modality ──────────────────────────────────
-    # stress_label: 0 = no stress, 1 = stress
     text_stress_label      = Column(SmallInteger, nullable=True)   # 0 | 1
     text_stress_confidence = Column(Float, nullable=True)          # 0.0 – 1.0
-    # Knowledge-graph enrichment
+
+    # Legacy KG lists (kept for backward compat)
     kg_symptoms  = Column(JSON, nullable=True)   # list[str]
     kg_triggers  = Column(JSON, nullable=True)   # list[str]
     kg_coping    = Column(JSON, nullable=True)   # list[str]
+
+    # FIX: five new KG columns that main.py reads back via r.kg_biological etc.
+    # and writes via extract_kg_fields(). Previously absent, causing AttributeError
+    # on every analytics read and silently dropping data on every write.
+    kg_biological        = Column(JSON,    nullable=True)   # list[str]  — activated biological nodes
+    kg_interventions     = Column(JSON,    nullable=True)   # list[dict] — {label, evidence}
+    kg_severity_band     = Column(String(20), nullable=True)  # "no_stress"|"low"|"moderate"|"high"|"critical"
+    kg_is_critical       = Column(Boolean, nullable=True)   # True when KG flags crisis pathway
+    kg_clinician_summary = Column(Text,    nullable=True)   # free-text clinician note from KG
 
     # ── Voice modality ────────────────────────────────────────
     voice_available        = Column(Boolean, default=False)

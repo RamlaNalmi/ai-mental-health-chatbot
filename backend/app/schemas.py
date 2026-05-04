@@ -65,6 +65,35 @@ class PredictOut(BaseModel):
 
 
 # ─────────────────────────────────────────────
+# KNOWLEDGE GRAPH — typed sub-models
+# FIX: these were missing entirely; KGApiResponse was referenced in main.py
+#      but never defined here, causing NameError at import time.
+# ─────────────────────────────────────────────
+class KGSymptomRef(BaseModel):
+    label: str
+    dsm5:  Optional[str] = None
+    icd11: Optional[str] = None
+
+
+class KGInterventionRef(BaseModel):
+    label:    str
+    evidence: Optional[str] = None
+
+
+class KGApiResponse(BaseModel):
+    severity_band:     str                        = "no_stress"
+    fused_score:       float                      = 0.0
+    stressors:         List[str]                  = []
+    symptoms:          List[KGSymptomRef]         = []
+    biological:        List[str]                  = []
+    interventions:     List[KGInterventionRef]    = []
+    measurement_tools: List[str]                  = []
+    is_critical:       bool                       = False
+    critical_reason:   Optional[str]              = None
+    clinician_summary: Optional[str]              = None
+
+
+# ─────────────────────────────────────────────
 # CHAT
 # ─────────────────────────────────────────────
 class ChatStartOut(BaseModel):
@@ -90,9 +119,14 @@ class ChatMessageOut(BaseModel):
     probs:                Optional[Dict[str, float]] = None
 
     # Text stress
-    stress_label:      Optional[int]            = None
+    # FIX: was Optional[int] — stress_label is now the string final_label
+    #      e.g. "stressed" | "not_stressed", never a raw 0/1 integer.
+    stress_label:      Optional[str]            = None
     stress_confidence: Optional[float]          = None
-    kg_response:       Optional[Dict[str, Any]] = None
+    # FIX: was Optional[Dict[str, Any]] — _build_kg_api_response() returns
+    #      a KGApiResponse instance, so the field must accept that model.
+    #      Pydantic will serialise it correctly to JSON on the way out.
+    kg_response:       Optional[KGApiResponse]  = None
 
     # Face / sensor
     face_stress_level: Optional[str]   = None

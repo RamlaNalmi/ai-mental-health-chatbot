@@ -83,7 +83,7 @@ class SignalInput:
     voice_score: Optional[float] = None            # 0.0–1.0
     voice_available: bool = False
 
-    # Face signal (from webcam ML model)
+    # Face signal (from webcam ML model)F
     face_stress_level: Optional[str] = None        # "no_stress"|"low"|"moderate"|"high"
     face_running: bool = False
 
@@ -127,7 +127,7 @@ class FusionResult:
 
     # ── Per-signal breakdown ──────────────────
     signals: dict                       # {signal_name: SignalScore as dict}
-    signals_used: int                   # How many signals contributed
+    signals_used: list                      # How many signals contributed
     signals_available: int              # How many were non-null
 
     # ── Context ───────────────────────────────
@@ -301,7 +301,7 @@ def fuse_signals(inp: SignalInput) -> FusionResult:
         fused_label=fused_label,
         confidence=round(fusion_confidence, 2),
         signals={k: asdict(v) for k, v in signal_scores.items()},
-        signals_used=n_available,
+        signals_used=list(available.keys()),
         signals_available=n_available,
         kg_result=inp.kg_result,
         dominant_signal=dominant,
@@ -526,7 +526,7 @@ def _neutral_result(inp: SignalInput) -> FusionResult:
         fused_label="no_stress",
         confidence=0.0,
         signals={},
-        signals_used=0,
+        signals_used=[],
         signals_available=0,
         kg_result=inp.kg_result,
         dominant_signal="none",
