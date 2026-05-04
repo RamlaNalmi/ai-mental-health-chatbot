@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://YOUR_PC_IP:8000'; // replace with your FastAPI server IP
+const API_URL = 'http://localhost:8000'; // updated for adb reverse
 
 const api = axios.create({
   baseURL: API_URL,

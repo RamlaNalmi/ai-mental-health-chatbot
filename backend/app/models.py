@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Boolean, JSON, UniqueConstraint,Text
+from sqlalchemy import String, Integer, Float, DateTime, ForeignKey, Boolean, JSON, UniqueConstraint, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from .db import Base
@@ -52,8 +52,6 @@ class Prediction(Base):
     predicted_label: Mapped[str] = mapped_column(String(16))
     probs_json: Mapped[dict] = mapped_column(JSON, default=dict)
 
-    from sqlalchemy import Text
-from datetime import datetime
 
 class ChatSession(Base):
     __tablename__ = "chat_sessions"

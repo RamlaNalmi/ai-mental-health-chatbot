@@ -12,8 +12,8 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import Voice from '@react-native-community/voice';
+import { MaterialIcons } from '@expo/vector-icons';
+import Voice from '../services/voice';
 import { chatAPI, baselineAPI } from '../services/api';
 import { removeAuthToken } from '../services/auth';
 
@@ -200,10 +200,10 @@ const ChatScreen = ({ navigation }) => {
           </View>
           <View style={styles.headerButtons}>
             <TouchableOpacity onPress={() => console.log('Current session ID:', sessionId)} style={styles.testButton}>
-              <Icon name="bug-report" size={20} color="#fff" />
+              <MaterialIcons name="bug-report" size={20} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-              <Icon name="logout" size={24} color="#fff" />
+              <MaterialIcons name="logout" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
         </View>
@@ -246,7 +246,7 @@ const ChatScreen = ({ navigation }) => {
               style={[styles.voiceButton, isRecording && styles.voiceButtonActive]}
               onPress={isRecording ? stopRecording : startRecording}
             >
-              <Icon 
+              <MaterialIcons 
                 name={isRecording ? "mic" : "mic-none"} 
                 size={24} 
                 color={isRecording ? "#fff" : "#667eea"} 
@@ -261,7 +261,7 @@ const ChatScreen = ({ navigation }) => {
               {loading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Icon name="send" size={20} color="#fff" />
+                <MaterialIcons name="send" size={20} color="#fff" />
               )}
             </TouchableOpacity>
           </View>

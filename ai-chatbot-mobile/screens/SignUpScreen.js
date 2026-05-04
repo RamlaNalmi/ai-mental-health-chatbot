@@ -11,7 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { authAPI } from '../services/api';
+import { authAPI, formatApiError } from '../services/api';
 import { storeAuthToken } from '../services/auth';
 
 const SignUpScreen = ({ navigation, setUserAuthenticated }) => {
@@ -42,7 +42,7 @@ const SignUpScreen = ({ navigation, setUserAuthenticated }) => {
       await storeAuthToken(response.access_token);
       setUserAuthenticated(true);
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.detail || 'Registration failed');
+      Alert.alert('Error', formatApiError(error, 'Registration failed'));
     } finally {
       setLoading(false);
     }

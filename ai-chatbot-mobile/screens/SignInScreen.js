@@ -11,7 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { authAPI } from '../services/api';
+import { authAPI, formatApiError } from '../services/api';
 import { storeAuthToken } from '../services/auth';
 
 const SignInScreen = ({ navigation, setUserAuthenticated }) => {
@@ -31,7 +31,7 @@ const SignInScreen = ({ navigation, setUserAuthenticated }) => {
       await storeAuthToken(response.access_token);
       setUserAuthenticated(true);
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.detail || 'Invalid credentials');
+      Alert.alert('Error', formatApiError(error, 'Invalid credentials'));
     } finally {
       setLoading(false);
     }

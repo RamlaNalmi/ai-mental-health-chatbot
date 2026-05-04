@@ -121,19 +121,28 @@ def fuse_predictions(voice_score, text_label):
 
 # ---------------- KG ----------------
 def get_kg_nodes():
-    with driver.session(database=NEO4J_DB) as session:
-        result = session.run("MATCH (n) WHERE n:Symptom OR n:StressTrigger OR n:StressCategory OR n:CopingMechanism RETURN n.name AS name, labels(n) AS labels")
-        return [{"name": r["name"], "labels": r["labels"]} for r in result]
+    try:
+        with driver.session(database=NEO4J_DB) as session:
+            result = session.run("MATCH (n) WHERE n:Symptom OR n:StressTrigger OR n:StressCategory OR n:CopingMechanism RETURN n.name AS name, labels(n) AS labels")
+            return [{"name": r["name"], "labels": r["labels"]} for r in result]
+    except Exception as e:
+        print(f"Neo4j Warning: Could not fetch nodes ({e})")
+        return []
 
 kg_nodes = get_kg_nodes()
 kg_texts = [node["name"] for node in kg_nodes]
-with torch.no_grad():
-    kg_embeddings = bert_encode(kg_texts).cpu().numpy()
+kg_embeddings = []
+if kg_texts:
+    with torch.no_grad():
+        kg_embeddings = bert_encode(kg_texts).cpu().numpy()
 
 def match_concepts_hybrid(text, top_k=10, threshold=0.51):
+    if not kg_embeddings:
+        return [], [], [], []
     with torch.no_grad():
         text_emb = bert_encode([text]).cpu().numpy()
     sims = cosine_similarity(text_emb, kg_embeddings)[0]
+
     matched_symptoms, matched_triggers, matched_categories, matched_coping = [], [], [], []
 
     for i, node in enumerate(kg_nodes):

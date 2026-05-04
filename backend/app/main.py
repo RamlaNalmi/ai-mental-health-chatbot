@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 import torch
@@ -10,11 +11,18 @@ from .auth import hash_password, verify_password, create_access_token, get_curre
 from .ml.model import load_artifact
 from .ml.feature_engineering import typing_features, text_features, build_x10
 from .ml.inference import get_baseline_mean10, compute_baseline_delta, update_baseline, predict_if_ready
-from .ml.final import stress_from_text, stress_from_voice
+from .ml.stress_lite import stress_from_text
 from .llm_client import llm_chat, LLMError, simple_fallback_reply
 
 # ------------------ APP INIT ------------------
 app = FastAPI(title="Cognitive Load + Stress Backend")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 Base.metadata.create_all(bind=engine)
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -210,7 +218,7 @@ def chat_message(session_id: int, req: schemas.ChatMessageIn, user=Depends(get_c
 
     # stress prediction
     stress_data = stress_from_text(req.text)
-    stress_label = stress_data.get("final_label") or stress_data.get("stress_label")
+    stress_label = stress_data.get("stress_label")
 
     print("Stress label used by chatbot:", stress_label)
 

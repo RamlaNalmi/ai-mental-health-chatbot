@@ -9,6 +9,7 @@ react {
 android {
     namespace "com.aichatbot"
     compileSdkVersion rootProject.ext.compileSdkVersion
+    ndkVersion rootProject.ext.ndkVersion
 
     defaultConfig {
         applicationId "com.aichatbot"
@@ -29,42 +30,7 @@ android {
 }
 
 dependencies {
-    implementation "com.facebook.react:react-android"
-
-    // FFT helper for voice feature extraction
-    implementation "com.github.wendykierp:JTransforms:3.1"
-}apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
-
-react {
-    autolinkLibrariesWithApp()
-}
-
-android {
-    namespace "com.aichatbot"
-    compileSdkVersion rootProject.ext.compileSdkVersion
-
-    defaultConfig {
-        applicationId "com.aichatbot"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-    }
-
-    buildTypes {
-        debug {
-        }
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-        }
-    }
-}
-
-dependencies {
-    implementation "com.facebook.react:react-android"
+    implementation "com.facebook.react:react-android:0.81.5"
 
     // FFT helper for voice feature extraction
     implementation "com.github.wendykierp:JTransforms:3.1"

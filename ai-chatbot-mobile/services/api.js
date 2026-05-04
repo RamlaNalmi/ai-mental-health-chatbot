@@ -1,7 +1,13 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getApiBaseUrl } from './apiBase';
 
-const API_BASE_URL = 'http://192.168.194.108:8000'; // Your computer's IP address
+export const API_BASE_URL = getApiBaseUrl();
+
+if (__DEV__) {
+  // eslint-disable-next-line no-console
+  console.log('[api] API_BASE_URL =', API_BASE_URL);
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -63,5 +69,24 @@ export const baselineAPI = {
     return response.data;
   },
 };
+
+/** User-visible message for failed auth/chat requests (network vs validation). */
+export function formatApiError(error, fallback = 'Something went wrong') {
+  const detail = error.response?.data?.detail;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail.map((e) => e.msg || JSON.stringify(e)).join('\n');
+  }
+  if (error.code === 'ECONNABORTED') {
+    return 'Request timed out. Is the backend running on port 8000?';
+  }
+  if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
+    return (
+      'Cannot reach the API. Start the backend on port 8000 with --host 0.0.0.0. ' +
+      'On a phone, the URL must be your PC LAN address (see Metro log: [api] API_BASE_URL).'
+    );
+  }
+  return error.message || fallback;
+}
 
 export default api;

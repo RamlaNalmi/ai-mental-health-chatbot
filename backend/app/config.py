@@ -3,7 +3,8 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # --- DB / Auth ---
-    DATABASE_URL: str = "postgresql+psycopg2://app:app@localhost:5432/cogload"
+    # Use PostgreSQL in production; SQLite works locally without Docker (override via DATABASE_URL).
+    DATABASE_URL: str = "sqlite:///./cogload.db"
     JWT_SECRET: str = "CHANGE_ME"
     JWT_ALG: str = "HS256"
     ACCESS_TOKEN_MINUTES: int = 60 * 24 * 7
